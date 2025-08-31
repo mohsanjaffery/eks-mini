@@ -1,7 +1,7 @@
 REGION ?= eu-west-1
 STACK  ?= eks-mini-stack
 CLUSTER?= eks-mini-cluster
-TEMPLATE ?= infra/cloudformation/eks-fixed-arm.json
+TEMPLATE ?= infra/cloudformation/eks-mini.json
 
 .PHONY: validate deploy destroy kubeconfig app-apply app-destroy lockdown
 

@@ -13,9 +13,9 @@ jobs:
           sudo apt-get install -y jq python3-pip curl tar
           pip install cfn-lint
       - name: Validate CloudFormation (cfn-lint)
-        run: cfn-lint infra/cloudformation/eks-fixed-arm.json
+        run: cfn-lint infra/cloudformation/eks-mini.json
       - name: Validate JSON parse
-        run: jq empty infra/cloudformation/eks-fixed-arm.json
+        run: jq empty infra/cloudformation/eks-mini.json
       - name: Validate Kubernetes YAML (basic schema)
         run: |
           curl -sSL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz \

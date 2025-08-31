@@ -25,7 +25,7 @@ brew install awscli kubectl jq rain
 export REGION=eu-west-1
 export STACK=eks-mini-stack
 export CLUSTER=eks-mini-cluster
-export TEMPLATE=infra/cloudformation/eks-fixed-arm.json
+export TEMPLATE=infra/cloudformation/eks-mini.json
 
 # 1) deploy the stack (open CIDR for creation; lock down later)
 rain deploy "$TEMPLATE" "$STACK" -r "$REGION" -y \
@@ -93,7 +93,7 @@ make destroy
 
 ```
 infra/
-  cloudformation/eks-fixed-arm.json
+  cloudformation/eks-mini.json
   scripts/{deploy.sh,destroy.sh,lockdown-api.sh}
 k8s/
   namespaces/demo.yaml
