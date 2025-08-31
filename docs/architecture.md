@@ -46,7 +46,7 @@ This project provisions a **minimal, low-cost Amazon EKS environment** for quick
 flowchart LR
   %% declare nodes (no classes inline)
   Internet((Client))
-  NLB[NLB (internet-facing)]
+  NLB["NLB (internet-facing)"]
   CP["EKS Control Plane (v1.30)<br/>AWS-managed"]
 
   subgraph VPC["VPC 10.0.0.0/16"]
@@ -68,7 +68,7 @@ flowchart LR
   NLB -->|"TCP:80 → NodePort 31080"| NodeB
   NodeA --> SVC[ClusterIP Service]
   NodeB --> SVC
-  SVC --> POD[hello Pod (NGINX + SPA)]
+  SVC --> POD["hello Pod (NGINX + SPA)"]
 
   %% control plane relations (dotted)
   CP -. "Kubernetes API (public / opt. private)" .-> NodeA
