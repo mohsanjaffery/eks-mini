@@ -17,8 +17,7 @@ deploy:
 	  --params ClusterName=$(CLUSTER),KubernetesVersion=1.30,NodeInstanceType=t4g.micro,DesiredSize=2,MinSize=1,MaxSize=2,NodeVolumeSizeGiB=20,PublicAccessCidrs=0.0.0.0/0
 
 destroy:
-	aws cloudformation delete-stack --stack-name $(STACK) --region $(REGION)
-	aws cloudformation wait stack-delete-complete --stack-name $(STACK) --region $(REGION)
+	rain rm $(STACK) -r $(REGION) -y
 
 kubeconfig:
 	aws eks update-kubeconfig --name $(CLUSTER) --region $(REGION)
