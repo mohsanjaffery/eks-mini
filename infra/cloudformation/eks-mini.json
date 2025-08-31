@@ -4,14 +4,18 @@
   "Parameters": {
     "ClusterName": {
       "Type": "String",
-      "Default": "my-eks",
+      "Default": "eks-mini-cluster",
       "AllowedPattern": "^[A-Za-z0-9\\-]+$",
       "Description": "EKS cluster name"
     },
     "KubernetesVersion": {
       "Type": "String",
       "Default": "1.30",
-      "AllowedValues": ["1.28", "1.29", "1.30"],
+      "AllowedValues": [
+        "1.28",
+        "1.29",
+        "1.30"
+      ],
       "Description": "EKS control plane version"
     },
     "NodeInstanceType": {
@@ -21,15 +25,15 @@
     },
     "DesiredSize": {
       "Type": "Number",
-      "Default": 1,
+      "Default": 2,
       "MinValue": 1,
-      "MaxValue": 5
+      "MaxValue": 10
     },
     "MinSize": {
       "Type": "Number",
       "Default": 1,
       "MinValue": 1,
-      "MaxValue": 5
+      "MaxValue": 10
     },
     "MaxSize": {
       "Type": "Number",
@@ -58,7 +62,12 @@
         "EnableDnsHostnames": true,
         "EnableDnsSupport": true,
         "Tags": [
-          { "Key": "Name", "Value": { "Fn::Sub": "${ClusterName}-vpc" } }
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${ClusterName}-vpc"
+            }
+          }
         ]
       }
     },
@@ -66,86 +75,184 @@
       "Type": "AWS::EC2::InternetGateway",
       "Properties": {
         "Tags": [
-          { "Key": "Name", "Value": { "Fn::Sub": "${ClusterName}-igw" } }
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${ClusterName}-igw"
+            }
+          }
         ]
       }
     },
     "VPCGatewayAttachment": {
       "Type": "AWS::EC2::VPCGatewayAttachment",
       "Properties": {
-        "VpcId": { "Ref": "VPC" },
-        "InternetGatewayId": { "Ref": "InternetGateway" }
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "InternetGatewayId": {
+          "Ref": "InternetGateway"
+        }
       }
     },
     "PublicRouteTable": {
       "Type": "AWS::EC2::RouteTable",
       "Properties": {
-        "VpcId": { "Ref": "VPC" },
+        "VpcId": {
+          "Ref": "VPC"
+        },
         "Tags": [
-          { "Key": "Name", "Value": { "Fn::Sub": "${ClusterName}-public-rt" } }
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${ClusterName}-public-rt"
+            }
+          }
         ]
       }
     },
     "PublicRoute": {
       "Type": "AWS::EC2::Route",
       "Properties": {
-        "RouteTableId": { "Ref": "PublicRouteTable" },
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        },
         "DestinationCidrBlock": "0.0.0.0/0",
-        "GatewayId": { "Ref": "InternetGateway" }
+        "GatewayId": {
+          "Ref": "InternetGateway"
+        }
       }
     },
     "PublicSubnetA": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "VpcId": { "Ref": "VPC" },
-        "AvailabilityZone": { "Fn::Select": [0, { "Fn::GetAZs": "" }] },
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
         "MapPublicIpOnLaunch": true,
-        "CidrBlock": { "Fn::Select": [0, { "Fn::Cidr": ["10.0.0.0/16", 2, 8] }] },
+        "CidrBlock": {
+          "Fn::Select": [
+            0,
+            {
+              "Fn::Cidr": [
+                "10.0.0.0/16",
+                2,
+                8
+              ]
+            }
+          ]
+        },
         "Tags": [
-          { "Key": "Name", "Value": { "Fn::Sub": "${ClusterName}-public-a" } },
-          { "Key": "kubernetes.io/role/elb", "Value": "1" },
-          { "Key": { "Fn::Sub": "kubernetes.io/cluster/${ClusterName}" }, "Value": "shared" }
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${ClusterName}-public-a"
+            }
+          },
+          {
+            "Key": "kubernetes.io/role/elb",
+            "Value": "1"
+          },
+          {
+            "Key": {
+              "Fn::Sub": "kubernetes.io/cluster/${ClusterName}"
+            },
+            "Value": "shared"
+          }
         ]
       }
     },
     "PublicSubnetB": {
       "Type": "AWS::EC2::Subnet",
       "Properties": {
-        "VpcId": { "Ref": "VPC" },
-        "AvailabilityZone": { "Fn::Select": [1, { "Fn::GetAZs": "" }] },
+        "VpcId": {
+          "Ref": "VPC"
+        },
+        "AvailabilityZone": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::GetAZs": ""
+            }
+          ]
+        },
         "MapPublicIpOnLaunch": true,
-        "CidrBlock": { "Fn::Select": [1, { "Fn::Cidr": ["10.0.0.0/16", 2, 8] }] },
+        "CidrBlock": {
+          "Fn::Select": [
+            1,
+            {
+              "Fn::Cidr": [
+                "10.0.0.0/16",
+                2,
+                8
+              ]
+            }
+          ]
+        },
         "Tags": [
-          { "Key": "Name", "Value": { "Fn::Sub": "${ClusterName}-public-b" } },
-          { "Key": "kubernetes.io/role/elb", "Value": "1" },
-          { "Key": { "Fn::Sub": "kubernetes.io/cluster/${ClusterName}" }, "Value": "shared" }
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${ClusterName}-public-b"
+            }
+          },
+          {
+            "Key": "kubernetes.io/role/elb",
+            "Value": "1"
+          },
+          {
+            "Key": {
+              "Fn::Sub": "kubernetes.io/cluster/${ClusterName}"
+            },
+            "Value": "shared"
+          }
         ]
       }
     },
     "SubnetARouteAssoc": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": { "Ref": "PublicRouteTable" },
-        "SubnetId": { "Ref": "PublicSubnetA" }
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PublicSubnetA"
+        }
       }
     },
     "SubnetBRouteAssoc": {
       "Type": "AWS::EC2::SubnetRouteTableAssociation",
       "Properties": {
-        "RouteTableId": { "Ref": "PublicRouteTable" },
-        "SubnetId": { "Ref": "PublicSubnetB" }
+        "RouteTableId": {
+          "Ref": "PublicRouteTable"
+        },
+        "SubnetId": {
+          "Ref": "PublicSubnetB"
+        }
       }
     },
     "EKSServiceRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": { "Fn::Sub": "${ClusterName}-eks-cluster-role" },
+        "RoleName": {
+          "Fn::Sub": "${ClusterName}-eks-cluster-role"
+        },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
             {
               "Effect": "Allow",
-              "Principal": { "Service": "eks.amazonaws.com" },
+              "Principal": {
+                "Service": "eks.amazonaws.com"
+              },
               "Action": "sts:AssumeRole"
             }
           ]
@@ -155,20 +262,29 @@
           "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
         ],
         "Tags": [
-          { "Key": "Name", "Value": { "Fn::Sub": "${ClusterName}-eks-cluster-role" } }
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${ClusterName}-eks-cluster-role"
+            }
+          }
         ]
       }
     },
     "NodeInstanceRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": { "Fn::Sub": "${ClusterName}-eks-node-role" },
+        "RoleName": {
+          "Fn::Sub": "${ClusterName}-eks-node-role"
+        },
         "AssumeRolePolicyDocument": {
           "Version": "2012-10-17",
           "Statement": [
             {
               "Effect": "Allow",
-              "Principal": { "Service": "ec2.amazonaws.com" },
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              },
               "Action": "sts:AssumeRole"
             }
           ]
@@ -179,107 +295,196 @@
           "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
         ],
         "Tags": [
-          { "Key": "Name", "Value": { "Fn::Sub": "${ClusterName}-eks-node-role" } }
+          {
+            "Key": "Name",
+            "Value": {
+              "Fn::Sub": "${ClusterName}-eks-node-role"
+            }
+          }
         ]
       }
     },
     "EKSCluster": {
       "Type": "AWS::EKS::Cluster",
       "Properties": {
-        "Name": { "Ref": "ClusterName" },
-        "Version": { "Ref": "KubernetesVersion" },
-        "RoleArn": { "Fn::GetAtt": ["EKSServiceRole", "Arn"] },
+        "Name": {
+          "Ref": "ClusterName"
+        },
+        "Version": {
+          "Ref": "KubernetesVersion"
+        },
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "EKSServiceRole",
+            "Arn"
+          ]
+        },
         "ResourcesVpcConfig": {
           "SubnetIds": [
-            { "Ref": "PublicSubnetA" },
-            { "Ref": "PublicSubnetB" }
+            {
+              "Ref": "PublicSubnetA"
+            },
+            {
+              "Ref": "PublicSubnetB"
+            }
           ],
           "EndpointPublicAccess": true,
           "EndpointPrivateAccess": false,
-          "PublicAccessCidrs": { "Ref": "PublicAccessCidrs" }
+          "PublicAccessCidrs": {
+            "Ref": "PublicAccessCidrs"
+          }
         },
         "Tags": [
-          { "Key": "Name", "Value": { "Ref": "ClusterName" } }
+          {
+            "Key": "Name",
+            "Value": {
+              "Ref": "ClusterName"
+            }
+          }
         ]
       }
     },
     "AddonVpcCni": {
       "Type": "AWS::EKS::Addon",
-      "DependsOn": "EKSCluster",
       "Properties": {
         "AddonName": "vpc-cni",
-        "ClusterName": { "Ref": "EKSCluster" },
+        "ClusterName": {
+          "Ref": "EKSCluster"
+        },
         "ResolveConflicts": "OVERWRITE"
       }
     },
     "AddonCoreDNS": {
       "Type": "AWS::EKS::Addon",
-      "DependsOn": "EKSCluster",
       "Properties": {
         "AddonName": "coredns",
-        "ClusterName": { "Ref": "EKSCluster" },
+        "ClusterName": {
+          "Ref": "EKSCluster"
+        },
         "ResolveConflicts": "OVERWRITE"
       }
     },
     "AddonKubeProxy": {
       "Type": "AWS::EKS::Addon",
-      "DependsOn": "EKSCluster",
       "Properties": {
         "AddonName": "kube-proxy",
-        "ClusterName": { "Ref": "EKSCluster" },
+        "ClusterName": {
+          "Ref": "EKSCluster"
+        },
         "ResolveConflicts": "OVERWRITE"
       }
     },
     "ManagedNodeGroup": {
       "Type": "AWS::EKS::Nodegroup",
-      "DependsOn": "EKSCluster",
       "Properties": {
-        "ClusterName": { "Ref": "EKSCluster" },
-        "NodegroupName": { "Fn::Sub": "${ClusterName}-ng" },
-        "NodeRole": { "Fn::GetAtt": ["NodeInstanceRole", "Arn"] },
+        "ClusterName": {
+          "Ref": "EKSCluster"
+        },
+        "NodegroupName": {
+          "Fn::Sub": "${ClusterName}-ng"
+        },
+        "NodeRole": {
+          "Fn::GetAtt": [
+            "NodeInstanceRole",
+            "Arn"
+          ]
+        },
         "Subnets": [
-          { "Ref": "PublicSubnetA" },
-          { "Ref": "PublicSubnetB" }
+          {
+            "Ref": "PublicSubnetA"
+          },
+          {
+            "Ref": "PublicSubnetB"
+          }
         ],
         "ScalingConfig": {
-          "DesiredSize": { "Ref": "DesiredSize" },
-          "MinSize": { "Ref": "MinSize" },
-          "MaxSize": { "Ref": "MaxSize" }
+          "DesiredSize": {
+            "Ref": "DesiredSize"
+          },
+          "MinSize": {
+            "Ref": "MinSize"
+          },
+          "MaxSize": {
+            "Ref": "MaxSize"
+          }
         },
         "InstanceTypes": [
-          { "Ref": "NodeInstanceType" }
+          {
+            "Ref": "NodeInstanceType"
+          }
         ],
         "AmiType": "AL2023_ARM_64_STANDARD",
-        "DiskSize": { "Ref": "NodeVolumeSizeGiB" },
+        "DiskSize": {
+          "Ref": "NodeVolumeSizeGiB"
+        },
         "CapacityType": "ON_DEMAND",
         "Tags": {
-          "Name": { "Fn::Sub": "${ClusterName}-ng" }
+          "Name": {
+            "Fn::Sub": "${ClusterName}-ng"
+          }
         }
       }
     }
   },
   "Outputs": {
     "ClusterNameOut": {
-      "Value": { "Ref": "ClusterName" },
-      "Export": { "Name": { "Fn::Sub": "${AWS::StackName}-ClusterName" } }
+      "Value": {
+        "Ref": "ClusterName"
+      },
+      "Export": {
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-ClusterName"
+        }
+      }
     },
     "ClusterArn": {
-      "Value": { "Fn::GetAtt": ["EKSCluster", "Arn"] }
+      "Value": {
+        "Fn::GetAtt": [
+          "EKSCluster",
+          "Arn"
+        ]
+      }
     },
     "ClusterEndpoint": {
-      "Value": { "Fn::GetAtt": ["EKSCluster", "Endpoint"] }
+      "Value": {
+        "Fn::GetAtt": [
+          "EKSCluster",
+          "Endpoint"
+        ]
+      }
     },
     "ClusterVersion": {
-      "Value": { "Ref": "KubernetesVersion" }
+      "Value": {
+        "Ref": "KubernetesVersion"
+      }
     },
     "VpcId": {
-      "Value": { "Ref": "VPC" }
+      "Value": {
+        "Ref": "VPC"
+      }
     },
     "PublicSubnetIds": {
-      "Value": { "Fn::Join": [",", [{ "Ref": "PublicSubnetA" }, { "Ref": "PublicSubnetB" }]] }
+      "Value": {
+        "Fn::Join": [
+          ",",
+          [
+            {
+              "Ref": "PublicSubnetA"
+            },
+            {
+              "Ref": "PublicSubnetB"
+            }
+          ]
+        ]
+      }
     },
     "NodeRoleArn": {
-      "Value": { "Fn::GetAtt": ["NodeInstanceRole", "Arn"] }
+      "Value": {
+        "Fn::GetAtt": [
+          "NodeInstanceRole",
+          "Arn"
+        ]
+      }
     }
   }
 }

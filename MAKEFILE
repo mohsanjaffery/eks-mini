@@ -1,0 +1,32 @@
+REGION ?= eu-west-1
+STACK  ?= eks-mini-stack
+CLUSTER?= eks-mini-cluster
+TEMPLATE ?= infra/cloudformation/eks-mini.json
+
+.PHONY: validate deploy destroy kubeconfig app-apply app-destroy lockdown
+
+validate:
+jq empty $(TEMPLATE)
+aws cloudformation validate-template --region $(REGION) --template-body file://$(TEMPLATE)
+
+deploy:
+rain deploy $(TEMPLATE) $(STACK) -r $(REGION) -y \
+  --params ClusterName=$(CLUSTER),KubernetesVersion=1.30,NodeInstanceType=t4g.micro,DesiredSize=2,MinSize=1,MaxSize=2,NodeVolumeSizeGiB=20,PublicAccessCidrs=0.0.0.0/0
+
+destroy:
+aws cloudformation delete-stack --stack-name $(STACK) --region $(REGION)
+aws cloudformation wait stack-delete-complete --stack-name $(STACK) --region $(REGION)
+
+kubeconfig:
+aws eks update-kubeconfig --name $(CLUSTER) --region $(REGION)
+
+app-apply:
+kubectl apply -f k8s/namespaces/demo.yaml
+kubectl -n demo apply -f k8s/apps/hello/deployment.yaml
+kubectl -n demo apply -f k8s/apps/hello/service-nlb.yaml
+
+app-destroy:
+kubectl delete ns demo --ignore-not-found
+
+lockdown:
+./infra/scripts/lockdown-api.sh $(CLUSTER) $(REGION)
