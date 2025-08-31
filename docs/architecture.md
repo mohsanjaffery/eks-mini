@@ -44,38 +44,52 @@ This project provisions a **minimal, low-cost Amazon EKS environment** for quick
 
 ```mermaid
 flowchart LR
-  Internet((Client)):::ext -->|HTTP:80| NLB[NLB (internet-facing)]:::alb
+  %% declare nodes (no classes inline)
+  Internet((Client))
+  NLB[NLB (internet-facing)]
+  CP["EKS Control Plane (v1.30)<br/>AWS-managed"]
 
   subgraph VPC["VPC 10.0.0.0/16"]
-    IGW[Internet Gateway]:::net
-    RT[Public Route Table\n0.0.0.0/0 → IGW]:::net
+    IGW[Internet Gateway]
+    RT["Public Route Table<br/>0.0.0.0/0 → IGW"]
 
     subgraph SubnetA["Public Subnet A"]
-      NodeA[EC2 Node (ARM64)\nMNG]:::node
+      NodeA["EC2 Node (ARM64)<br/>MNG"]
     end
 
     subgraph SubnetB["Public Subnet B"]
-      NodeB[EC2 Node (ARM64)\nMNG]:::node
+      NodeB["EC2 Node (ARM64)<br/>MNG"]
     end
   end
 
-  CP[EKS Control Plane (v1.30)\nAWS-managed]:::cp -. Kubernetes API (public / opt. private) .- NodeA
-  CP -.-> NodeB
-
+  %% edges
+  Internet -->|HTTP:80| NLB
   NLB -->|"TCP:80 → NodePort 31080"| NodeA
   NLB -->|"TCP:80 → NodePort 31080"| NodeB
-
-  NodeA --> SVC[ClusterIP Service]:::svc
+  NodeA --> SVC[ClusterIP Service]
   NodeB --> SVC
-  SVC --> POD[hello Pod (NGINX + SPA)]:::pod
+  SVC --> POD[hello Pod (NGINX + SPA)]
 
-  classDef ext fill:#fff,stroke:#666,stroke-width:1px;
+  %% control plane relations (dashed)
+  CP -. Kubernetes API (public / opt. private) .- NodeA
+  CP -.-> NodeB
+
+  %% styles (apply classes after nodes are declared)
+  classDef ext fill:#ffffff,stroke:#666,stroke-width:1px;
   classDef alb fill:#eef6ff,stroke:#3b82f6,stroke-width:1px;
-  classDef cp fill:#fff4e5,stroke:#f59e0b,stroke-width:1px;
+  classDef cp  fill:#fff4e5,stroke:#f59e0b,stroke-width:1px;
   classDef net fill:#f3f4f6,stroke:#9ca3af,stroke-width:1px;
   classDef node fill:#ecfdf5,stroke:#10b981,stroke-width:1px;
   classDef svc fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px;
   classDef pod fill:#e0f2fe,stroke:#38bdf8,stroke-width:1px;
+
+  class Internet ext
+  class NLB alb
+  class CP cp
+  class IGW,RT net
+  class NodeA,NodeB node
+  class SVC svc
+  class POD pod
 ```
 
 ---
@@ -134,3 +148,4 @@ sequenceDiagram
 | IAM Roles (cluster/node) | `AWS::IAM::Role` |
 | Managed Add-ons | `AWS::EKS::Addon` (vpc-cni, coredns, kube-proxy) |
 | Managed Node Group | `AWS::EKS::Nodegroup` |
+
