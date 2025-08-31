@@ -1,5 +1,5 @@
-STACK  ?= eks-mini-stack
-CLUSTER?= eks-mini-cluster
+REGION ?= eu-west-1
+STACK  ?= spiracle-stack
 CLUSTER?= spiracle
 TEMPLATE ?= infra/cloudformation/eks-mini.json
 
@@ -14,7 +14,7 @@ validate:
 
 deploy:
 	rain deploy $(TEMPLATE) $(STACK) -r $(REGION) -y \
-	--params ClusterName=$(CLUSTER),KubernetesVersion=1.30,NodeInstanceType=t4g.micro,DesiredSize=2,MinSize=1,MaxSize=2,NodeVolumeSizeGiB=20,PublicAccessCidrs=0.0.0.0/0
+	  --params ClusterName=$(CLUSTER),KubernetesVersion=1.30,NodeInstanceType=t4g.micro,DesiredSize=2,MinSize=1,MaxSize=2,NodeVolumeSizeGiB=20,PublicAccessCidrs=0.0.0.0/0
 
 destroy:
 	aws cloudformation delete-stack --stack-name $(STACK) --region $(REGION)
