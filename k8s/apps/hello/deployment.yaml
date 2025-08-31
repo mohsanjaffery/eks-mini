@@ -1,3 +1,168 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hello-spa
+  namespace: demo
+data:
+  index.html: |-
+    <!doctype html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>EKS Mini — Hello</title>
+      <!-- React (no build step) -->
+      <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+      <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+      <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+      <style>
+        :root { --bg1:#0f172a; --bg2:#111827; --card:#0b1220; --text:#e5e7eb; --muted:#9ca3af; --accent:#22d3ee; --accent2:#60a5fa; }
+        * { box-sizing: border-box; }
+        body {
+          margin:0; min-height:100vh; color:var(--text);
+          font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+          background: radial-gradient(1200px 800px at 20% 20%, #0b1220, transparent),
+                      radial-gradient(1200px 800px at 80% 0%, rgba(96,165,250,.2), transparent),
+                      linear-gradient(180deg, var(--bg1), var(--bg2));
+          display:grid; place-items:center; padding:2rem;
+        }
+        .card { width:min(960px,94vw); background:rgba(11,18,32,.75); backdrop-filter:blur(6px);
+          border:1px solid rgba(255,255,255,.08); border-radius:16px; padding:28px; box-shadow:0 20px 60px rgba(0,0,0,.35); }
+        .badge { display:inline-block; padding:6px 10px; border-radius:999px; font-size:12px; letter-spacing:.08em; text-transform:uppercase;
+          background:linear-gradient(90deg,var(--accent),var(--accent2)); color:#0b1220; font-weight:700; }
+        h1 { margin:14px 0 8px; font-size:clamp(22px,3.2vw,30px); line-height:1.2; }
+        p.lead { color:var(--muted); margin:0 0 14px; font-size:clamp(13px,2vw,16px); }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:14px; }
+        .panel { background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:12px; }
+        .k { color:var(--muted); font-size:11px; letter-spacing:.06em; text-transform:uppercase; }
+        .v { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+             font-size: clamp(10px,1.3vw,12px); overflow-wrap:anywhere; word-break:break-word; line-height:1.25; }
+        details { margin-top:12px; background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:10px 12px; }
+        details > summary { cursor:pointer; list-style:none; font-weight:700; }
+        details > summary::-webkit-details-marker { display:none; }
+        .list { margin:10px 0 0; font-size:12px; color:var(--text); }
+        .list code { background:rgba(255,255,255,.06); padding:2px 6px; border-radius:6px; }
+        .links { margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+        a.btn { display:inline-flex; align-items:center; gap:8px; padding:9px 12px; border-radius:10px; text-decoration:none;
+                color:#0b1220; font-weight:700; background:linear-gradient(90deg,var(--accent),var(--accent2)); }
+        footer { margin-top:14px; color:var(--muted); font-size:11px; }
+      </style>
+    </head>
+    <body>
+      <main class="card">
+        <span class="badge">EKS Mini</span>
+        <h1>Just another SPA - this time on EKS.</h1>
+        <p class="lead">This React SPA is served by NGINX in your EKS cluster and exposed via an internet-facing NLB.</p>
+
+        <div id="root"></div>
+
+        <footer>
+          Customize via <code>k8s/apps/hello/deployment.yaml</code> — update the ConfigMap (this file) or add files under <code>/usr/share/nginx/html</code>.
+        </footer>
+      </main>
+
+      <script type="text/babel">
+        const { useEffect, useState } = React;
+
+        function useText(url) {
+          const [data, setData] = useState('');
+          const [err, setErr] = useState(null);
+          useEffect(() => {
+            fetch(url).then(r => r.ok ? r.text() : Promise.reject(r.status))
+              .then(t => setData((t||'').trim()))
+              .catch(e => setErr(e));
+          }, [url]);
+          return [data, err];
+        }
+
+        function KV({k, v}) {
+          return (
+            <div className="panel">
+              <div className="k">{k}</div>
+              <div className="v">{v || '—'}</div>
+            </div>
+          );
+        }
+
+        function Section({title, children}) {
+          return (
+            <details>
+              <summary>{title}</summary>
+              <div className="list">{children}</div>
+            </details>
+          );
+        }
+
+        function parseKeyVals(s) {
+          if (!s) return {};
+          const out = {};
+          s.split('\n').forEach(line => {
+            const m = line.match(/^([^=]+)="?(.*)"?$/);
+            if (m) out[m[1]] = m[2];
+          });
+          return out;
+        }
+
+        function App() {
+          const host = window.location.hostname;
+          const path = window.location.pathname || '/';
+          const proto = window.location.protocol.replace(':','');
+          const ua = navigator.userAgent;
+
+          // Files produced by initContainer into /podinfo
+          const [podName]   = useText('/podinfo/pod-name');
+          const [namespace] = useText('/podinfo/namespace');
+          const [nodeName]  = useText('/podinfo/node-name');
+          const [podIP]     = useText('/podinfo/pod-ip');
+          const [labels]    = useText('/podinfo/labels');
+          const [ann]       = useText('/podinfo/annotations');
+
+          const labelObj = parseKeyVals(labels);
+          const annObj   = parseKeyVals(ann);
+
+          return (
+            <div>
+              <div className="grid">
+                <KV k="Host" v={host} />
+                <KV k="Path" v={path} />
+                <KV k="Protocol" v={proto} />
+                <KV k="User Agent" v={ua} />
+              </div>
+
+              <Section title="Kubernetes Context">
+                <div className="grid">
+                  <KV k="Namespace" v={namespace} />
+                  <KV k="Pod Name" v={podName} />
+                  <KV k="Node" v={nodeName} />
+                  <KV k="Pod IP" v={podIP} />
+                </div>
+              </Section>
+
+              <Section title="Pod Labels">
+                {Object.keys(labelObj).length
+                  ? <ul>{Object.entries(labelObj).map(([k,v]) => <li key={k}><code>{k}</code> = <code>{v}</code></li>)}</ul>
+                  : <em>No labels available</em>}
+              </Section>
+
+              <Section title="Pod Annotations">
+                {Object.keys(annObj).length
+                  ? <ul>{Object.entries(annObj).map(([k,v]) => <li key={k}><code>{k}</code> = <code>{v}</code></li>)}</ul>
+                  : <em>No annotations available</em>}
+              </Section>
+
+              <div className="links">
+                <a className="btn" href="https://kubernetes.io/docs/home/" target="_blank" rel="noreferrer">Kubernetes Docs</a>
+                <a className="btn" href="https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html" target="_blank" rel="noreferrer">Amazon EKS</a>
+              </div>
+            </div>
+          );
+        }
+
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+      </script>
+    </body>
+    </html>
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -6,13 +171,71 @@ metadata:
 spec:
   replicas: 1
   selector:
-    matchLabels: { app: hello }
+    matchLabels:
+      app: hello
   template:
-    metadata: { labels: { app: hello } }
+    metadata:
+      labels:
+        app: hello
     spec:
       nodeSelector:
         kubernetes.io/arch: arm64
+      initContainers:
+        - name: write-meta
+          image: public.ecr.aws/docker/library/busybox:stable
+          command: ["/bin/sh","-c"]
+          args:
+            - |
+              set -e
+              mkdir -p /work
+              printf "%s" "$POD_NAME"    > /work/pod-name
+              printf "%s" "$NAMESPACE"   > /work/namespace
+              printf "%s" "$NODE_NAME"   > /work/node-name
+              printf "%s" "$POD_IP"      > /work/pod-ip
+              # copy labels/annotations (may not exist on some distros)
+              if [ -f /meta/labels ]; then cp /meta/labels /work/labels; fi
+              if [ -f /meta/annotations ]; then cp /meta/annotations /work/annotations; fi
+          env:
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+            - name: NAMESPACE
+              valueFrom: { fieldRef: { fieldPath: metadata.namespace } }
+            - name: NODE_NAME
+              valueFrom: { fieldRef: { fieldPath: spec.nodeName } }
+            - name: POD_IP
+              valueFrom: { fieldRef: { fieldPath: status.podIP } }
+          volumeMounts:
+            - name: podinfo
+              mountPath: /work
+            - name: podmeta
+              mountPath: /meta
+              readOnly: true
       containers:
         - name: web
           image: public.ecr.aws/docker/library/nginx:stable
-          ports: [ { containerPort: 80 } ]
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: web-root
+              mountPath: /usr/share/nginx/html/index.html
+              subPath: index.html
+              readOnly: true
+            - name: podinfo
+              mountPath: /usr/share/nginx/html/podinfo
+              readOnly: true
+      volumes:
+        - name: web-root
+          configMap:
+            name: hello-spa
+            items:
+              - key: index.html
+                path: index.html
+        - name: podmeta
+          downwardAPI:
+            items:
+              - path: labels
+                fieldRef: { fieldPath: metadata.labels }
+              - path: annotations
+                fieldRef: { fieldPath: metadata.annotations }
+        - name: podinfo
+          emptyDir: {}
