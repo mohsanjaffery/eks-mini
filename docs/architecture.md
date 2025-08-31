@@ -48,19 +48,19 @@ This project provisions a **minimal, low-cost Amazon EKS environment** for quick
   "themeVariables": {
     "fontSize": "16px",
 
-    /* Make connectors visible in light & dark */
+    /* High-contrast connectors */
     "lineColor": "#2563eb",
     "primaryBorderColor": "#2563eb",
 
-    /* Nodes default to white cards with dark text for contrast on dark UIs */
+    /* Node cards: readable on dark UIs */
     "primaryColor": "#ffffff",
     "primaryTextColor": "#111111",
 
-    /* Subgraph (cluster) styling */
-    "clusterBkg": "#f8fafc",
+    /* Default cluster (subgraph) look */
+    "clusterBkg": "#f3f4f6",
     "clusterBorder": "#2563eb",
 
-    /* Keep edge labels readable */
+    /* Edge labels stay legible */
     "edgeLabelBackground": "#ffffff"
   }
 }}%%
@@ -95,19 +95,23 @@ flowchart LR
   CP -. "Kubernetes API (public / opt. private)" .-> NodeA
   CP -.-> NodeB
 
-  %% high-contrast styles
-  style VPC fill:#f8fafc,stroke:#2563eb,stroke-width:2px,color:#111111
-  style SubnetA fill:#ffffff,stroke:#94a3b8,stroke-width:1.5px,color:#111111
-  style SubnetB fill:#ffffff,stroke:#94a3b8,stroke-width:1.5px,color:#111111
+  %% harmonious, dark-mode safe styling
+  /* VPC gets a blue-gray background (not white) */
+  style VPC fill:#e8eefc,stroke:#2563eb,stroke-width:2px,color:#111111
 
-  %% emphasize key components with dark fills + white text
+  /* Subnets: subtle gray to separate from VPC */
+  style SubnetA fill:#f3f4f6,stroke:#94a3b8,stroke-width:1.5px,color:#111111
+  style SubnetB fill:#f3f4f6,stroke:#94a3b8,stroke-width:1.5px,color:#111111
+
+  /* Emphasize key components with dark fills + white text */
   classDef emphasis fill:#0b5394,color:#ffffff,stroke:#0b5394,stroke-width:2px;
   class NLB emphasis
   class CP emphasis
 
-  %% make control-plane links orange & dashed for visibility
-  %% (these are the last two links in order → indices 6 and 7)
+  /* Make control-plane links orange & dashed for visibility */
+  /* (last two links in order → indices 6 and 7) */
   linkStyle 6,7 stroke:#f59e0b,stroke-width:2px,stroke-dasharray:4 3;
+
 ```
 ---
 
