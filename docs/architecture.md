@@ -43,10 +43,23 @@ This project provisions a **minimal, low-cost Amazon EKS environment** for quick
 ## Diagram — Logical layout
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontSize": "16px",
+    "lineColor": "#2563eb",
+    "primaryBorderColor": "#2563eb",
+    "primaryColor": "#ffffff",
+    "primaryTextColor": "#111111",
+    "clusterBkg": "#e8eefc",
+    "clusterBorder": "#2563eb",
+    "edgeLabelBackground": "#ffffff"
+  }
+}}%%
 flowchart LR
-  %% declare nodes (no classes inline)
+  %% declare nodes (quote labels that have parentheses or <br/>)
   Internet((Client))
-  NLB[NLB (internet-facing)]
+  NLB["NLB (internet-facing)"]
   CP["EKS Control Plane (v1.30)<br/>AWS-managed"]
 
   subgraph VPC["VPC 10.0.0.0/16"]
@@ -62,34 +75,30 @@ flowchart LR
     end
   end
 
-  %% edges
+  %% edges (blue for visibility in both themes)
   Internet -->|HTTP:80| NLB
   NLB -->|"TCP:80 → NodePort 31080"| NodeA
   NLB -->|"TCP:80 → NodePort 31080"| NodeB
   NodeA --> SVC[ClusterIP Service]
   NodeB --> SVC
-  SVC --> POD[hello Pod (NGINX + SPA)]
+  SVC --> POD["hello Pod (NGINX + SPA)"]
 
-  %% control plane relations (dotted)
+  %% control plane relations (dashed)
   CP -. "Kubernetes API (public / opt. private)" .-> NodeA
   CP -.-> NodeB
 
-  %% styles (apply classes after nodes are declared)
-  classDef ext fill:#ffffff,stroke:#666,stroke-width:1px;
-  classDef alb fill:#eef6ff,stroke:#3b82f6,stroke-width:1px;
-  classDef cp  fill:#fff4e5,stroke:#f59e0b,stroke-width:1px;
-  classDef net fill:#f3f4f6,stroke:#9ca3af,stroke-width:1px;
-  classDef node fill:#ecfdf5,stroke:#10b981,stroke-width:1px;
-  classDef svc fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px;
-  classDef pod fill:#e0f2fe,stroke:#38bdf8,stroke-width:1px;
+  %% harmonious, dark-mode safe styling
+  style VPC fill:#e8eefc,stroke:#2563eb,stroke-width:2px,color:#111111
+  style SubnetA fill:#f3f4f6,stroke:#94a3b8,stroke-width:1.5px,color:#111111
+  style SubnetB fill:#f3f4f6,stroke:#94a3b8,stroke-width:1.5px,color:#111111
 
-  class Internet ext
-  class NLB alb
-  class CP cp
-  class IGW,RT net
-  class NodeA,NodeB node
-  class SVC svc
-  class POD pod
+  %% emphasize key components with dark fills + white text
+  classDef emphasis fill:#0b5394,color:#ffffff,stroke:#0b5394,stroke-width:2px;
+  class NLB emphasis
+  class CP emphasis
+
+  %% make control-plane links orange & dashed for visibility (edges #6 and #7)
+  linkStyle 6,7 stroke:#f59e0b,stroke-width:2px,stroke-dasharray:4 3;
 
 ```
 ---
