@@ -47,20 +47,12 @@ This project provisions a **minimal, low-cost Amazon EKS environment** for quick
   "theme": "base",
   "themeVariables": {
     "fontSize": "16px",
-
-    /* High-contrast connectors */
     "lineColor": "#2563eb",
     "primaryBorderColor": "#2563eb",
-
-    /* Node cards: readable on dark UIs */
     "primaryColor": "#ffffff",
     "primaryTextColor": "#111111",
-
-    /* Default cluster (subgraph) look */
-    "clusterBkg": "#f3f4f6",
+    "clusterBkg": "#e8eefc",
     "clusterBorder": "#2563eb",
-
-    /* Edge labels stay legible */
     "edgeLabelBackground": "#ffffff"
   }
 }}%%
@@ -91,25 +83,21 @@ flowchart LR
   NodeB --> SVC
   SVC --> POD["hello Pod (NGINX + SPA)"]
 
-  %% control plane relations (dashed + orange to distinguish)
+  %% control plane relations (dashed)
   CP -. "Kubernetes API (public / opt. private)" .-> NodeA
   CP -.-> NodeB
 
   %% harmonious, dark-mode safe styling
-  /* VPC gets a blue-gray background (not white) */
   style VPC fill:#e8eefc,stroke:#2563eb,stroke-width:2px,color:#111111
-
-  /* Subnets: subtle gray to separate from VPC */
   style SubnetA fill:#f3f4f6,stroke:#94a3b8,stroke-width:1.5px,color:#111111
   style SubnetB fill:#f3f4f6,stroke:#94a3b8,stroke-width:1.5px,color:#111111
 
-  /* Emphasize key components with dark fills + white text */
+  %% emphasize key components with dark fills + white text
   classDef emphasis fill:#0b5394,color:#ffffff,stroke:#0b5394,stroke-width:2px;
   class NLB emphasis
   class CP emphasis
 
-  /* Make control-plane links orange & dashed for visibility */
-  /* (last two links in order → indices 6 and 7) */
+  %% make control-plane links orange & dashed for visibility (edges #6 and #7)
   linkStyle 6,7 stroke:#f59e0b,stroke-width:2px,stroke-dasharray:4 3;
 
 ```
