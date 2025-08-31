@@ -1,5 +1,5 @@
-REGION ?= eu-west-1
-STACK  ?= spiracle-stack
+STACK  ?= eks-mini-stack
+CLUSTER?= eks-mini-cluster
 CLUSTER?= spiracle
 TEMPLATE ?= infra/cloudformation/eks-mini.json
 
