@@ -1,6 +1,6 @@
 REGION ?= eu-west-1
-STACK  ?= spiracle-stack
-CLUSTER?= spiracle
+STACK  ?= eks-mini
+CLUSTER?= eks-mini-cluster
 TEMPLATE ?= infra/cloudformation/eks-mini.json
 
 .PHONY: help validate deploy destroy kubeconfig app-apply app-destroy lockdown
