@@ -488,7 +488,7 @@
     },
     "NextSteps": {
       "Description": "Suggested post-deploy commands",
-      "Value": "1) make app-apply\n           2) make lockdown\n           3) make app-wait && make app-open  # or: make app-curl"
+      "Value": "0) make kubeconfig\n               1) make app-apply\n               2) make lockdown\n               3) make app-wait\n               4) make app-open or make app-curl"
     }
   }
 }
