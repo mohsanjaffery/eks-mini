@@ -1,0 +1,16 @@
+# macOS cruft
+.DS_Store
+
+# local env / creds
+.env
+*.local
+.aws/
+.kube/
+
+# logs
+*.log
+
+# editor
+.vscode/
+.idea/
+
