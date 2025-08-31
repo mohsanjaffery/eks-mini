@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Usage: ./lockdown-api.sh <cluster> <region>
 set -euo pipefail
 CLUSTER="${1:?cluster name}"
 REGION="${2:?region}"
