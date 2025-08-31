@@ -43,6 +43,17 @@ This project provisions a **minimal, low-cost Amazon EKS environment** for quick
 ## Diagram — Logical layout
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "primaryColor": "#ffffff",
+    "primaryTextColor": "#111111",
+    "primaryBorderColor": "#111111",
+    "lineColor": "#111111",
+    "fontSize": "16px",
+    "edgeLabelBackground": "#ffffff"
+  }
+}}%%
 flowchart LR
   %% declare nodes (no classes inline)
   Internet((Client))
@@ -70,26 +81,22 @@ flowchart LR
   NodeB --> SVC
   SVC --> POD["hello Pod (NGINX + SPA)"]
 
-  %% control plane relations (dotted)
+  %% control plane relations (dotted, high contrast)
   CP -. "Kubernetes API (public / opt. private)" .-> NodeA
   CP -.-> NodeB
 
-  %% styles (apply classes after nodes are declared)
-  classDef ext fill:#ffffff,stroke:#666,stroke-width:1px;
-  classDef alb fill:#eef6ff,stroke:#3b82f6,stroke-width:1px;
-  classDef cp  fill:#fff4e5,stroke:#f59e0b,stroke-width:1px;
-  classDef net fill:#f3f4f6,stroke:#9ca3af,stroke-width:1px;
-  classDef node fill:#ecfdf5,stroke:#10b981,stroke-width:1px;
-  classDef svc fill:#ede9fe,stroke:#8b5cf6,stroke-width:1px;
-  classDef pod fill:#e0f2fe,stroke:#38bdf8,stroke-width:1px;
+  %% high-contrast styles
+  %% subgraphs: thicker borders for boxes
+  style VPC fill:#f8fafc,stroke:#111111,stroke-width:2px,color:#111111
+  style SubnetA fill:#ffffff,stroke:#111111,stroke-width:1.5px,color:#111111
+  style SubnetB fill:#ffffff,stroke:#111111,stroke-width:1.5px,color:#111111
 
-  class Internet ext
-  class NLB alb
-  class CP cp
-  class IGW,RT net
-  class NodeA,NodeB node
-  class SVC svc
-  class POD pod
+  %% emphases: dark fills + white text
+  classDef emphasis fill:#0b5394,color:#ffffff,stroke:#111111,stroke-width:2px;
+  classDef emphasisAlt fill:#1f2937,color:#ffffff,stroke:#111111,stroke-width:2px;
+
+  class NLB emphasis
+  class CP emphasisAlt
 
 ```
 ---
