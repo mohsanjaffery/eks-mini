@@ -485,6 +485,10 @@
           "Arn"
         ]
       }
+    },
+    "NextSteps": {
+      "Description": "Suggested post-deploy commands",
+      "Value": "1) make app-apply\n2) make lockdown\n3) make app-wait && make app-open  # or: make app-curl"
     }
   }
 }
