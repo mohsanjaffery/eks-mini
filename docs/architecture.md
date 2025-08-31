@@ -70,8 +70,8 @@ flowchart LR
   NodeB --> SVC
   SVC --> POD[hello Pod (NGINX + SPA)]
 
-  %% control plane relations (dashed)
-  CP -. Kubernetes API (public / opt. private) .- NodeA
+  %% control plane relations (dotted)
+  CP -. "Kubernetes API (public / opt. private)" .-> NodeA
   CP -.-> NodeB
 
   %% styles (apply classes after nodes are declared)
@@ -90,8 +90,8 @@ flowchart LR
   class NodeA,NodeB node
   class SVC svc
   class POD pod
-```
 
+```
 ---
 
 ## Diagram — Request sequence
