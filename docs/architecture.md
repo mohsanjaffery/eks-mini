@@ -46,16 +46,26 @@ This project provisions a **minimal, low-cost Amazon EKS environment** for quick
 %%{init: {
   "theme": "base",
   "themeVariables": {
+    "fontSize": "16px",
+
+    /* Make connectors visible in light & dark */
+    "lineColor": "#2563eb",
+    "primaryBorderColor": "#2563eb",
+
+    /* Nodes default to white cards with dark text for contrast on dark UIs */
     "primaryColor": "#ffffff",
     "primaryTextColor": "#111111",
-    "primaryBorderColor": "#111111",
-    "lineColor": "#111111",
-    "fontSize": "16px",
+
+    /* Subgraph (cluster) styling */
+    "clusterBkg": "#f8fafc",
+    "clusterBorder": "#2563eb",
+
+    /* Keep edge labels readable */
     "edgeLabelBackground": "#ffffff"
   }
 }}%%
 flowchart LR
-  %% declare nodes (no classes inline)
+  %% declare nodes (quote labels that have parentheses or <br/>)
   Internet((Client))
   NLB["NLB (internet-facing)"]
   CP["EKS Control Plane (v1.30)<br/>AWS-managed"]
@@ -73,7 +83,7 @@ flowchart LR
     end
   end
 
-  %% edges
+  %% edges (blue for visibility in both themes)
   Internet -->|HTTP:80| NLB
   NLB -->|"TCP:80 → NodePort 31080"| NodeA
   NLB -->|"TCP:80 → NodePort 31080"| NodeB
@@ -81,23 +91,23 @@ flowchart LR
   NodeB --> SVC
   SVC --> POD["hello Pod (NGINX + SPA)"]
 
-  %% control plane relations (dotted, high contrast)
+  %% control plane relations (dashed + orange to distinguish)
   CP -. "Kubernetes API (public / opt. private)" .-> NodeA
   CP -.-> NodeB
 
   %% high-contrast styles
-  %% subgraphs: thicker borders for boxes
-  style VPC fill:#f8fafc,stroke:#111111,stroke-width:2px,color:#111111
-  style SubnetA fill:#ffffff,stroke:#111111,stroke-width:1.5px,color:#111111
-  style SubnetB fill:#ffffff,stroke:#111111,stroke-width:1.5px,color:#111111
+  style VPC fill:#f8fafc,stroke:#2563eb,stroke-width:2px,color:#111111
+  style SubnetA fill:#ffffff,stroke:#94a3b8,stroke-width:1.5px,color:#111111
+  style SubnetB fill:#ffffff,stroke:#94a3b8,stroke-width:1.5px,color:#111111
 
-  %% emphases: dark fills + white text
-  classDef emphasis fill:#0b5394,color:#ffffff,stroke:#111111,stroke-width:2px;
-  classDef emphasisAlt fill:#1f2937,color:#ffffff,stroke:#111111,stroke-width:2px;
-
+  %% emphasize key components with dark fills + white text
+  classDef emphasis fill:#0b5394,color:#ffffff,stroke:#0b5394,stroke-width:2px;
   class NLB emphasis
-  class CP emphasisAlt
+  class CP emphasis
 
+  %% make control-plane links orange & dashed for visibility
+  %% (these are the last two links in order → indices 6 and 7)
+  linkStyle 6,7 stroke:#f59e0b,stroke-width:2px,stroke-dasharray:4 3;
 ```
 ---
 
